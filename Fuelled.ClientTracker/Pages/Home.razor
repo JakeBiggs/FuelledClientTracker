@@ -1,0 +1,111 @@
+﻿@page "/"
+@using Fuelled.ClientTracker.Services
+@using Fuelled.ClientTracker.Models
+@inject ClientService ClientService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Dashboard</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Client Tracker Dashboard</h1>
+</div>
+
+@if (isLoading)
+{
+    <p><em>Loading dashboard data...</em></p>
+}
+else
+{
+    <!-- Key Metric Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Total Clients</h5>
+                    <p class="card-text fs-2">@totalClients</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Onboarding In Progress</h5>
+                    <p class="card-text fs-2">@onboardingInProgress</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Renewals (Next 30 Days)</h5>
+                    <p class="card-text fs-2">@upcomingRenewals</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <h4>Upcoming Renewals</h4>
+            @if (clientsWithUpcomingRenewals.Any())
+            {
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Client</th>
+                            <th>Renewal Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var client in clientsWithUpcomingRenewals)
+                        {
+                            <tr @onclick="@(() => NavigationManager.NavigateTo($"/client/{client.Id}"))" style="cursor:pointer;">
+                                <td>@client.Name</td>
+                                <td>@client.RenewalDate?.ToShortDateString()</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p>No clients have renewals in the next 30 days.</p>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    private bool isLoading = true;
+    private List<Client>? allClients;
+
+    // Properties for the dashboard metrics
+    private int totalClients = 0;
+    private int onboardingInProgress = 0;
+    private int upcomingRenewals = 0;
+    private List<Client> clientsWithUpcomingRenewals = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        allClients = await ClientService.GetClientsAsync();
+
+        if (allClients != null)
+        {
+            // Calculate KPIs and stuff
+            totalClients = allClients.Count;
+            onboardingInProgress = allClients.Count(c => c.OnboardingStage == OnboardingStage.InProgress);
+
+            var today = DateTime.Today;
+            var nextmonth = today.AddDays(30);
+
+            clientsWithUpcomingRenewals = allClients
+            .Where(c => c.RenewalDate.HasValue && c.RenewalDate.Value >= today && c.RenewalDate.Value <= nextmonth)
+            .OrderBy(c => c.RenewalDate)
+            .ToList();
+
+            upcomingRenewals = clientsWithUpcomingRenewals.Count;
+        }
+
+        isLoading = false;
+    }
+}

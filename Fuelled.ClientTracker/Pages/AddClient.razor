@@ -1,0 +1,121 @@
+@page "/add-client"
+@using Fuelled.ClientTracker.Services
+@using Fuelled.ClientTracker.Models
+@inject ClientService ClientService
+@inject NavigationManager NavigationManager
+
+<h3>Add New Client</h3>
+
+<EditForm Model="@newClient" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label for="companyName" class="form-label">Company Name</label>
+        <InputText id="companyName" class="form-control" @bind-Value="newClient.Name" />
+    </div>
+
+    <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <InputText id="email" type="email" class="form-control" @bind-Value="newClient.Email" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Policy Types</label>
+        @foreach (var policy in availablePolicies)
+        {
+            <div class="form-check">
+                <InputCheckbox id="@policy" class="form-check-input" @bind-Value="selectedPolicies[policy]" @bind-Value:after="UpdatePolicyState" />
+                <label for="@policy" class="form-check-label">@policy</label>
+            </div>
+        }
+    </div>
+
+    @if (selectedPolicies.Any(p => p.Value))
+    {
+        <div class="mb-3">
+            <label for="startDate" class="form-label">Policy Start Date</label>
+            <InputDate id="startDate" class="form-control" @bind-Value="newClient.StartDate" @bind-Value:after="UpdateRenewalDate" />
+        </div>
+
+        <div class="mb-3">
+            <label for="policyLength" class="form-label">Policy Length</label>
+            <InputSelect id="policyLength" class="form-select" @bind-Value="selectedPolicyLengthInMonths" @bind-Value:after="UpdateRenewalDate">
+                <option value="3">3 Months</option>
+                <option value="6">6 Months</option>
+                <option value="12">12 Months</option>
+            </InputSelect>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Policy Renewal Date</label>
+            <p class="form-control-plaintext">@(newClient.RenewalDate.HasValue ? newClient.RenewalDate.Value.ToShortDateString() : "N/A")</p>
+        </div>
+    }
+
+    <div class="mb-3">
+        <label for="onboardingStage" class="form-label">Onboarding Stage</label>
+        <InputSelect id="onboardingStage" class="form-select" @bind-Value="newClient.OnboardingStage">
+            @foreach (var stage in Enum.GetValues(typeof(OnboardingStage)))
+            {
+                <option value="@stage">@stage</option>
+            }
+        </InputSelect>
+    </div>
+
+    <button type="submit" class="btn btn-success">Save Client</button>
+    <button type="button" class="btn btn-secondary" @onclick="@(() => NavigationManager.NavigateTo("/clients"))">Cancel</button>
+</EditForm>
+
+@code {
+    private Client newClient = new();
+    private int selectedPolicyLengthInMonths = 12;
+    private List<string> availablePolicies = new() { "Employers Liability", "Public/Products Liability", "Professional Indemnity", "Cyber & Data", "Directors & Officers", "Commerical Property" };
+    private Dictionary<string, bool> selectedPolicies = new();
+
+    protected override void OnInitialized()
+    {
+        foreach (var policy in availablePolicies)
+        {
+            selectedPolicies[policy] = false;
+        }
+    }
+
+    private void UpdatePolicyState()
+    {
+        bool shouldShowFields = selectedPolicies.Any(p => p.Value);
+
+        if (shouldShowFields)
+        {
+            if (newClient.StartDate == null)
+            {
+                newClient.StartDate = DateTime.Today;
+                UpdateRenewalDate();
+            }
+        }
+        else
+        {
+            newClient.StartDate = null;
+            newClient.RenewalDate = null;
+        }
+    }
+    
+    private void UpdateRenewalDate()
+    {
+        if (newClient.StartDate.HasValue)
+        {
+            newClient.RenewalDate = newClient.StartDate.Value.AddMonths(selectedPolicyLengthInMonths);
+        }
+        else
+        {
+            newClient.RenewalDate = null;
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        newClient.PolicyTypes = selectedPolicies.Where(kvp => kvp.Value).Select(kvp => kvp.Key).ToList();
+        await ClientService.AddClientAsync(newClient);
+        NavigationManager.NavigateTo("/clients");
+    }
+}
