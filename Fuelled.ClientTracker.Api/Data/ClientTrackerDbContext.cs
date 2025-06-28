@@ -9,15 +9,6 @@ namespace Fuelled.ClientTracker.Api.Data
         {
         }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-                // Use MySQL connection string from appsettings.json
-                optionsBuilder.UseMySQL("Server=localhost;Port=3306;Database=clienttracker;User=root;Password=toor;");
-            }
-        }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Client>().HasData(

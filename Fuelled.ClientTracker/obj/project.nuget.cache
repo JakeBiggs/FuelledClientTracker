@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "YVluKoX6CIg=",
+  "dgSpecHash": "+/nSMp4l/ss=",
   "success": true,
-  "projectFilePath": "C:\\Users\\PC\\Fuelled.ClientTracker\\Fuelled.ClientTracker.csproj",
+  "projectFilePath": "C:\\Users\\PC\\Documents\\FuelledClientTracker\\Fuelled.ClientTracker\\Fuelled.ClientTracker.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\PC\\.nuget\\packages\\microsoft.aspnetcore.authorization\\9.0.6\\microsoft.aspnetcore.authorization.9.0.6.nupkg.sha512",
     "C:\\Users\\PC\\.nuget\\packages\\microsoft.aspnetcore.components\\9.0.6\\microsoft.aspnetcore.components.9.0.6.nupkg.sha512",

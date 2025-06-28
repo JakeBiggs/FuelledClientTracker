@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "hShNstMjZQA=",
+  "dgSpecHash": "84KkRlrFJ4w=",
   "success": true,
-  "projectFilePath": "C:\\Users\\PC\\Fuelled.ClientTracker.Api\\Fuelled.ClientTracker.Api.csproj",
+  "projectFilePath": "C:\\Users\\PC\\Documents\\FuelledClientTracker\\Fuelled.ClientTracker.Api\\Fuelled.ClientTracker.Api.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\PC\\.nuget\\packages\\bouncycastle.cryptography\\2.5.1\\bouncycastle.cryptography.2.5.1.nupkg.sha512",
     "C:\\Users\\PC\\.nuget\\packages\\google.protobuf\\3.30.0\\google.protobuf.3.30.0.nupkg.sha512",

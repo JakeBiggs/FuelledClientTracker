@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\PC\\Fuelled.ClientTracker\\Fuelled.ClientTracker.csproj": {}
+    "C:\\Users\\PC\\Documents\\FuelledClientTracker\\Fuelled.ClientTracker\\Fuelled.ClientTracker.csproj": {}
   },
   "projects": {
-    "C:\\Users\\PC\\Fuelled.ClientTracker\\Fuelled.ClientTracker.csproj": {
+    "C:\\Users\\PC\\Documents\\FuelledClientTracker\\Fuelled.ClientTracker\\Fuelled.ClientTracker.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\PC\\Fuelled.ClientTracker\\Fuelled.ClientTracker.csproj",
+        "projectUniqueName": "C:\\Users\\PC\\Documents\\FuelledClientTracker\\Fuelled.ClientTracker\\Fuelled.ClientTracker.csproj",
         "projectName": "Fuelled.ClientTracker",
-        "projectPath": "C:\\Users\\PC\\Fuelled.ClientTracker\\Fuelled.ClientTracker.csproj",
+        "projectPath": "C:\\Users\\PC\\Documents\\FuelledClientTracker\\Fuelled.ClientTracker\\Fuelled.ClientTracker.csproj",
         "packagesPath": "C:\\Users\\PC\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\PC\\Fuelled.ClientTracker\\obj\\",
+        "outputPath": "C:\\Users\\PC\\Documents\\FuelledClientTracker\\Fuelled.ClientTracker\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

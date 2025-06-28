@@ -17,10 +17,10 @@
 <table class="table">
     <thead>
         <tr>
-            <th>Company Name</th>
-            <th>Email</th>
-            <th>Onboarding Stage</th>
-            <th>Renewal Date</th>
+            <th @onclick="@(() => ToggleSort("Name"))">Company Name</th>
+            <th @onclick="@(() => ToggleSort("Email"))">Email</th>
+            <th @onclick="@(() => ToggleSort("OnboardingStage"))">Onboarding Stage</th>
+            <th @onclick="@(() => ToggleSort("RenewalDate"))">Renewal Date</th>
         </tr>
     </thead>
 
@@ -39,7 +39,7 @@
         }
         else
         {
-            @foreach (var client in clients)
+            @foreach (var client in GetSortedClients())
             {
                 <tr @onclick="() => ToggleExpanded(client.Id)">
                     <td>@client.Name</td>
@@ -88,6 +88,8 @@
 @code {
     private List<Client>? clients;
     private int? ExpandedClientId = null;
+    private string currentSortField = "Name";
+    private bool isAscending = true;
 
     protected override async Task OnInitializedAsync()
     {
@@ -149,6 +151,39 @@
                 break;
         }
         return stageText;
+    }
+
+    private IEnumerable<Client> GetSortedClients()
+    {
+        if (clients == null)
+            return Enumerable.Empty<Client>();
+
+        switch (currentSortField)
+        {
+            case "Name":
+                return isAscending ? clients.OrderBy(c => c.Name) : clients.OrderByDescending(c => c.Name);
+            case "Email":
+                return isAscending ? clients.OrderBy(c => c.Email) : clients.OrderByDescending(c => c.Email);
+            case "OnboardingStage":
+                return isAscending ? clients.OrderBy(c => c.OnboardingStage) : clients.OrderByDescending(c => c.OnboardingStage);
+            case "RenewalDate":
+                return isAscending ? clients.OrderBy(c => c.RenewalDate) : clients.OrderByDescending(c => c.RenewalDate);
+            default:
+                return clients; // Default case
+        }
+    }
+
+    private void ToggleSort(string field)
+    {
+        if (currentSortField == field)
+        {
+            isAscending = !isAscending; //Toggles order
+        }
+        else
+        {
+            currentSortField = field;
+            isAscending = true;
+        }
     }
 
     private void GoToAddClientPage()
