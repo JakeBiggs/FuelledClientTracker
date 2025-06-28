@@ -1,8 +1,6 @@
 @page "/clients"
 @using Fuelled.ClientTracker.Services
 @using Fuelled.ClientTracker.Models
-@using System.Reflection.Metadata.Ecma335;
-
 
 @inject ClientService ClientService
 @inject NavigationManager NavigationManager
@@ -15,7 +13,7 @@
     </button>
 </div>
 
-<select @bind="selectedStageFilter">
+<select @bind="selectedStageFilter" @bind:after="StateHasChanged">
     <option value="">All Stages</option>
     @foreach (var stage in Enum.GetValues<OnboardingStage>())
     {
@@ -23,14 +21,16 @@
     }
 </select>
 
-<select @bind="selectedPolicyFilter">
-    <option value=""> All Policy Types</option>
-    @foreach (var policyType in availablePolicies)
-    {
-        <option value="@policyType.ToString()">@policyType</option>
-    }
+<div>
+    <strong>Filter by Policy Type:</strong><br />
+    <select @bind="selectedPolicyFilters" @bind:after="StateHasChanged" multiple class="form-select" style="height: 150px;">
+        @foreach (var policy in availablePolicies)
+        {
+            <option value="@policy">@policy</option>
+        }
+    </select>
+</div>
 
-</select>
 
 <table class="table">
     <thead>
@@ -114,7 +114,7 @@
     private bool isAscending = true;
 
     //Filtering
-    private string selectedPolicyFilter = "";
+    private string[] selectedPolicyFilters = Array.Empty<string>();
     private string selectedStageFilter = "";
     private List<string> availablePolicies = new() { "Employers Liability", "Public/Products Liability", "Professional Indemnity", "Cyber & Data", "Directors & Officers", "Commerical Property" };
 
@@ -180,6 +180,8 @@
         return stageText;
     }
 
+
+
     private IEnumerable<Client> GetSortedClients()
     {
         if (clients == null)
@@ -192,8 +194,8 @@
             filtered = filtered.Where(c => c.OnboardingStage.ToString() == selectedStageFilter);
         }
 
-        if(!string.IsNullOrEmpty(selectedPolicyFilter)){
-            filtered = filtered.Where(c => c.PolicyTypes.Contains(selectedPolicyFilter));
+        if(selectedPolicyFilters.Any()){
+            filtered = filtered.Where(c=> c.PolicyTypes.Any(p => selectedPolicyFilters.Contains(p)));
         }
 
         switch (currentSortField)
