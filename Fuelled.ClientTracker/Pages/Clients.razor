@@ -14,6 +14,24 @@
         <span class="bi bi-plus-circle-fill" aria-hidden="true"></span> New Client
     </button>
 </div>
+
+<select @bind="selectedStageFilter">
+    <option value="">All Stages</option>
+    @foreach (var stage in Enum.GetValues<OnboardingStage>())
+    {
+        <option value="@stage.ToString()">@stage</option>
+    }
+</select>
+
+<select @bind="selectedPolicyFilter">
+    <option value=""> All Policy Types</option>
+    @foreach (var policyType in availablePolicies)
+    {
+        <option value="@policyType.ToString()">@policyType</option>
+    }
+
+</select>
+
 <table class="table">
     <thead>
         <tr>
@@ -90,8 +108,15 @@
 @code {
     private List<Client>? clients;
     private int? ExpandedClientId = null;
+
+    // Sorting
     private string currentSortField = "";
     private bool isAscending = true;
+
+    //Filtering
+    private string selectedPolicyFilter = "";
+    private string selectedStageFilter = "";
+    private List<string> availablePolicies = new() { "Employers Liability", "Public/Products Liability", "Professional Indemnity", "Cyber & Data", "Directors & Officers", "Commerical Property" };
 
     protected override async Task OnInitializedAsync()
     {
@@ -159,19 +184,30 @@
     {
         if (clients == null)
             return Enumerable.Empty<Client>();
+        
+        // Apply filtering
+        var filtered = clients.AsEnumerable();
+
+        if(!string.IsNullOrEmpty(selectedStageFilter)){
+            filtered = filtered.Where(c => c.OnboardingStage.ToString() == selectedStageFilter);
+        }
+
+        if(!string.IsNullOrEmpty(selectedPolicyFilter)){
+            filtered = filtered.Where(c => c.PolicyTypes.Contains(selectedPolicyFilter));
+        }
 
         switch (currentSortField)
         {
             case "Name":
-                return isAscending ? clients.OrderBy(c => c.Name) : clients.OrderByDescending(c => c.Name);
+                return isAscending ? filtered.OrderBy(c => c.Name) : filtered.OrderByDescending(c => c.Name);
             case "Email":
-                return isAscending ? clients.OrderBy(c => c.Email) : clients.OrderByDescending(c => c.Email);
+                return isAscending ? filtered.OrderBy(c => c.Email) : filtered.OrderByDescending(c => c.Email);
             case "OnboardingStage":
-                return isAscending ? clients.OrderBy(c => c.OnboardingStage) : clients.OrderByDescending(c => c.OnboardingStage);
+                return isAscending ? filtered.OrderBy(c => c.OnboardingStage) : filtered.OrderByDescending(c => c.OnboardingStage);
             case "RenewalDate":
-                return isAscending ? clients.OrderBy(c => c.RenewalDate) : clients.OrderByDescending(c => c.RenewalDate);
+                return isAscending ? filtered.OrderBy(c => c.RenewalDate) : filtered.OrderByDescending(c => c.RenewalDate);
             default:
-                return clients; // Default case
+                return filtered; // Return the filtered list if no sort is applied
         }
     }
 
