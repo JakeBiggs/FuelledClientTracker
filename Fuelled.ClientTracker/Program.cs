@@ -12,4 +12,6 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 builder.Services.AddScoped<ClientService>();
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("http://localhost:5279/") }); //Don't bother making https until SSL is set up
 
+
+
 await builder.Build().RunAsync();

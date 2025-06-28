@@ -3,9 +3,8 @@
 @using Fuelled.ClientTracker.Services
 @using Fuelled.ClientTracker.Models
 @using ChartJs.Blazor
-@using ChartJs.Blazor.ChartJS.PieChart
-@using ChartJs.Blazor.ChartJS.Common
-@using ChartJs.Blazor.ChartJS.Common.Enums
+@using ChartJs.Blazor.PieChart
+@using ChartJs.Blazor.Common
 @using ChartJs.Blazor.Util
 @using System.Drawing
 
@@ -14,14 +13,11 @@
 <PageTitle>Data Insights</PageTitle>
 
 <h1>Data Insights</h1>
-<p>Welcome to the Data Insights page. Here you can view various insights and analytics related to your clients and their
-    activities.</p>
-
 
 <div class="row mb-4">
     <div class="col-md-4">
         <label for="insight-select" class="form-label"><strong>Select Metric:</strong></label>
-        <select id="insight-select" class="form-select" @bind="selectedMetric" @bind:after="UpdateChartData">
+        <select id="insight-select" class="form-select" @onchange="OnMetricChanged">
             <option value="OnboardingStage">Onboarding Stage Distribution</option>
             <option value="PolicyType">Policy Type Distribution</option>
         </select>
@@ -29,81 +25,113 @@
 </div>
 
 <div class="row">
+    <div class="col-md-4">
+        <ul class="list-group">
+            @foreach (var entry in chartData.OrderByDescending(v => v.Value))
+            {
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    @entry.Key
+                    <span class="badge bg-primary rounded-pill">@entry.Value</span>
+                </li>
+            }
+        </ul>
+    </div>
     <div class="col-md-8">
-        <h3>@chartTitle</h3>
-        @if (chartData.Any())
+        @if (_pieConfig != null)
         {
-            <div class="row">
-                <div class="col-md-6">
-                    <ul class="list-group">
-                        @foreach (var entry in chartData.OrderByDescending(kv => kv.Value))
-                        {
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                @entry.Key
-                                <span class="badge bg-primary rounded-pill">@entry.Value</span>
-                            </li>
-                        }
-                    </ul>
-                </div>
-
-            </div>
+            <Chart Config="_pieConfig" @ref="_pieChart"></Chart>
         }
         else
         {
-            <p>No data available to display.</p>
+            <p>Loading chart...</p>
         }
     </div>
 </div>
 
-
 @code {
-
     private List<Client>? clients;
-
-    private string chartTitle = "Client Insights Chart";
     private string selectedMetric = "OnboardingStage";
+
     private Dictionary<string, int> chartData = new();
-
-
+    private PieConfig? _pieConfig;
+    private ChartJs.Blazor.Chart? _pieChart;
+    //tried to for some nice fuelled brand colours
+    private readonly List<string> _colorPalette = new() { "#ff66c5", "#2b2b2b", "#e6e3db", "#ff99d6", "#888888" };
 
     protected override async Task OnInitializedAsync()
     {
+        _pieConfig = new PieConfig
+        {
+            Options = new PieOptions
+            {
+                Responsive = true,
+                Title = new OptionsTitle { Display = true }
+            }
+        };
 
         clients = await ClientService.GetClientsAsync();
-        UpdateChartData();
+
+        if (clients != null && clients.Any())
+        {
+            UpdateChartData();
+        }
     }
 
+    private async Task OnMetricChanged(ChangeEventArgs e)
+    {
+        selectedMetric = e.Value?.ToString() ?? "OnboardingStage";
+        UpdateChartData();
+        if (_pieChart != null)
+        {
+            await _pieChart.Update();
+        }
+    }
 
     private void UpdateChartData()
     {
-        if (clients == null || !clients.Any())
-        {
-            chartData.Clear();
-            return;
-        }
+        if (clients == null || _pieConfig == null) return;
+
+        string title;
 
         switch (selectedMetric)
         {
             case "OnboardingStage":
-                chartTitle = "Onboarding Stage Distribution";
+                title = "Onboarding Stage Distribution";
                 chartData = clients.GroupBy(c => c.OnboardingStage.ToString()).ToDictionary(g => g.Key, g => g.Count());
-                pieOptions = new PieConfig
-                {
-                    Options = new PieOptions
-                    {
-                        Responsive = true,
-                        Title = new ChartJs.Blazor.ChartJS.Common.Properties.OptionsTitle { Display = true, Text = chartTitle },
-                    }
-                };
-
-
                 break;
             case "PolicyType":
-                chartTitle = "Policy Type Distribution";
-                chartData = clients.SelectMany(c => c.PolicyTypes).GroupBy(p => p).ToDictionary(g => g.Key, g => g.Count());
+                title = "Distribution of Policy Types";
+                chartData = clients.Where(c => c.PolicyTypes != null).SelectMany(c => c.PolicyTypes).GroupBy(p => p).ToDictionary(g =>
+                g.Key, g => g.Count());
                 break;
+            default:
+                return;
         }
 
+        _pieConfig.Options.Title.Text = title;
+        _pieConfig.Data.Labels.Clear();
+        _pieConfig.Data.Datasets.Clear();
 
+        var dataset = new PieDataset<int>(chartData.Values.ToList())
+        {
+            //BackgroundColor = chartData.Keys.Select(k => GetRandomColor()).ToArray()
+
+            // loop through the color palette if ran out
+            BackgroundColor = chartData.Keys.Select((key, index) => _colorPalette[index % _colorPalette.Count]).ToArray()
+        };
+
+        foreach (var key in chartData.Keys)
+        {
+            _pieConfig.Data.Labels.Add(key);
+        }
+
+        _pieConfig.Data.Datasets.Add(dataset);
 
     }
+
+    private string GetRandomColor()
+    {
+        var r = new Random();
+        return ColorUtil.FromDrawingColor(Color.FromArgb(200, r.Next(50, 230), r.Next(50, 230), r.Next(50, 230)));
+    }
+}
