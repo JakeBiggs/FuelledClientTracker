@@ -28,7 +28,43 @@
         <span class="dismiss">🗙</span>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
-    <script src="lib/bootstrap/dist/js/ChartJsBlazorInterop.js"></script>
+
+
+    <script>
+        // Chart.js interop implementation
+        window.ChartJsInterop = {
+            setupChart: function (config) {
+                console.log("Setting up chart:", config.canvasId);
+                try {
+                    var ctx = document.getElementById(config.canvasId);
+                    window[config.canvasId] = new Chart(ctx, {
+                        type: config.type,
+                        data: config.data,
+                        options: config.options
+                    });
+                    return true;
+                } catch (e) {
+                    console.error("Error in setupChart:", e);
+                    return false;
+                }
+            },
+            updateChart: function (config) {
+                console.log("Updating chart:", config.canvasId);
+                try {
+                    var chart = window[config.canvasId];
+                    chart.data = config.data;
+                    chart.options = config.options;
+                    chart.update();
+                    return true;
+                } catch (e) {
+                    console.error("Error in updateChart:", e);
+                    return false;
+                }
+            }
+        };
+        console.log("ChartJsInterop initialized");
+    </script>
+
 
     <script src="_framework/blazor.webassembly.js"></script>
 
