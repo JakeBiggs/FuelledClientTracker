@@ -1,7 +1,109 @@
 @page "/insights"
 
+@using Fuelled.ClientTracker.Services
+@using Fuelled.ClientTracker.Models
+@using ChartJs.Blazor
+@using ChartJs.Blazor.ChartJS.PieChart
+@using ChartJs.Blazor.ChartJS.Common
+@using ChartJs.Blazor.ChartJS.Common.Enums
+@using ChartJs.Blazor.Util
+@using System.Drawing
+
+@inject ClientService ClientService
+
 <PageTitle>Data Insights</PageTitle>
 
 <h1>Data Insights</h1>
 <p>Welcome to the Data Insights page. Here you can view various insights and analytics related to your clients and their
     activities.</p>
+
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <label for="insight-select" class="form-label"><strong>Select Metric:</strong></label>
+        <select id="insight-select" class="form-select" @bind="selectedMetric" @bind:after="UpdateChartData">
+            <option value="OnboardingStage">Onboarding Stage Distribution</option>
+            <option value="PolicyType">Policy Type Distribution</option>
+        </select>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <h3>@chartTitle</h3>
+        @if (chartData.Any())
+        {
+            <div class="row">
+                <div class="col-md-6">
+                    <ul class="list-group">
+                        @foreach (var entry in chartData.OrderByDescending(kv => kv.Value))
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                @entry.Key
+                                <span class="badge bg-primary rounded-pill">@entry.Value</span>
+                            </li>
+                        }
+                    </ul>
+                </div>
+
+            </div>
+        }
+        else
+        {
+            <p>No data available to display.</p>
+        }
+    </div>
+</div>
+
+
+@code {
+
+    private List<Client>? clients;
+
+    private string chartTitle = "Client Insights Chart";
+    private string selectedMetric = "OnboardingStage";
+    private Dictionary<string, int> chartData = new();
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        clients = await ClientService.GetClientsAsync();
+        UpdateChartData();
+    }
+
+
+    private void UpdateChartData()
+    {
+        if (clients == null || !clients.Any())
+        {
+            chartData.Clear();
+            return;
+        }
+
+        switch (selectedMetric)
+        {
+            case "OnboardingStage":
+                chartTitle = "Onboarding Stage Distribution";
+                chartData = clients.GroupBy(c => c.OnboardingStage.ToString()).ToDictionary(g => g.Key, g => g.Count());
+                pieOptions = new PieConfig
+                {
+                    Options = new PieOptions
+                    {
+                        Responsive = true,
+                        Title = new ChartJs.Blazor.ChartJS.Common.Properties.OptionsTitle { Display = true, Text = chartTitle },
+                    }
+                };
+
+
+                break;
+            case "PolicyType":
+                chartTitle = "Policy Type Distribution";
+                chartData = clients.SelectMany(c => c.PolicyTypes).GroupBy(p => p).ToDictionary(g => g.Key, g => g.Count());
+                break;
+        }
+
+
+
+    }
