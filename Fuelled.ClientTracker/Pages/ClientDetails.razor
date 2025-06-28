@@ -47,6 +47,28 @@ else
                 </div>
             }
         </div>
+        @if (selectedPolicies.Any(p => p.Value)){
+        <div class="mb-3">
+            <label class="form-label">Policy Start Date</label>
+            <InputDate id="startDate" class="form-control" @bind-Value="client.StartDate" />
+        </div>
+
+        <div class="mb-3">
+            <label for="policyLength" class="form-label">Policy Length</label>
+            <InputSelect id="policyLength" class="form-select" @bind-Value="selectedPolicyLengthInMonths">
+                <option value="3">3 Months</option>
+                <option value="6">6 Months</option>
+                <option value="12">12 Months</option>
+            </InputSelect>
+        </div>
+
+        <div class="mb-3">
+                <label for="renewalDate" class="form-label">Renewal Date</label>
+                <input type="text" id="renewalDate" class="form-control" readonly
+                    value="@(client.RenewalDate.HasValue ? client.RenewalDate.Value.ToShortDateString() : "")" />
+        </div>
+
+        }
 
         <button type="submit" class="btn btn-success">Update Client</button>
         
@@ -69,6 +91,7 @@ else
     private Client? client;
     private List<string> availablePolicies = new() { "Employers Liability", "Public/Products Liability", "Professional Indemnity", "Cyber & Data", "Directors & Officers", "Commerical Property" };
     private Dictionary<string, bool> selectedPolicies = new();
+    private int selectedPolicyLengthInMonths = 12;
     private bool showDeleteConfirmation = false;
     protected override async Task OnInitializedAsync()
     {
@@ -89,6 +112,36 @@ else
             client.PolicyTypes = selectedPolicies.Where(kvp => kvp.Value).Select(kvp => kvp.Key).ToList();
             await ClientService.UpdateClientAsync(client);
             NavigationManager.NavigateTo("/clients");
+        }
+    }
+
+    private void UpdateRenewalDate()
+    {
+        if (client.StartDate.HasValue)
+        {
+            client.RenewalDate = client.StartDate.Value.AddMonths(selectedPolicyLengthInMonths);
+        }
+        else
+        {
+            client.RenewalDate = null;
+        }
+    }
+
+    private void UpdatePolicyState(){
+        bool shouldShowFields = selectedPolicies.Any(p => p.Value);
+
+        if (shouldShowFields)
+        {
+            if (client.StartDate == null)
+            {
+                client.StartDate = DateTime.Today;
+                UpdateRenewalDate();
+            }
+        }
+        else
+        {
+            client.StartDate = null;
+            client.RenewalDate = null;
         }
     }
 

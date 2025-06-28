@@ -17,10 +17,12 @@
 <table class="table">
     <thead>
         <tr>
-            <th @onclick="@(() => ToggleSort("Name"))">Company Name</th>
-            <th @onclick="@(() => ToggleSort("Email"))">Email</th>
-            <th @onclick="@(() => ToggleSort("OnboardingStage"))">Onboarding Stage</th>
-            <th @onclick="@(() => ToggleSort("RenewalDate"))">Renewal Date</th>
+            <th @onclick="@(() => ToggleSort("Name"))">Company Name <span class="@GetSortIcon("Name")"></span></th>
+            <th @onclick="@(() => ToggleSort("Email"))">Email <span class="@GetSortIcon("Email")"></span></th>
+            <th @onclick="@(() => ToggleSort("OnboardingStage"))">Onboarding Stage <span
+                    class="@GetSortIcon("OnboardingStage")"></span></th>
+            <th @onclick="@(() => ToggleSort("RenewalDate"))">Renewal Date <span
+                    class="@GetSortIcon("RenewalDate")"></span></th>
         </tr>
     </thead>
 
@@ -88,7 +90,7 @@
 @code {
     private List<Client>? clients;
     private int? ExpandedClientId = null;
-    private string currentSortField = "Name";
+    private string currentSortField = "";
     private bool isAscending = true;
 
     protected override async Task OnInitializedAsync()
@@ -184,6 +186,15 @@
             currentSortField = field;
             isAscending = true;
         }
+    }
+
+    private string GetSortIcon(string field)
+    {
+        if (currentSortField != field)
+        {
+            return string.Empty;
+        }
+        return isAscending ? "bi bi-arrow-up" : "bi bi-arrow-down";
     }
 
     private void GoToAddClientPage()
