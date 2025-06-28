@@ -1,35 +1,38 @@
 @page "/clients"
 @using Fuelled.ClientTracker.Services
 @using Fuelled.ClientTracker.Models
+@using Fuelled.ClientTracker.Components
 
 @inject ClientService ClientService
 @inject NavigationManager NavigationManager
 
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h3>Clients</h3>
-    <button class="btn btn-primary" @onclick="GoToAddClientPage">
-        <span class="bi bi-plus-circle-fill" aria-hidden="true"></span> New Client
-    </button>
+    <h1>Client Tracker</h1>
 </div>
 
-<select @bind="selectedStageFilter" @bind:after="StateHasChanged">
-    <option value="">All Stages</option>
-    @foreach (var stage in Enum.GetValues<OnboardingStage>())
-    {
-        <option value="@stage.ToString()">@stage</option>
-    }
-</select>
+<div class="d-flex justify-content-between align-items-end mb-3">
+   
+    <div class="d-flex align-items-end gap-3">
+        <div>
+            <label class="form-label mb-0"><strong>Onboarding Stage:</strong></label>
+            <MultiSelectDropdown Items="Enum.GetNames(typeof(OnboardingStage)).ToList()" @bind-SelectedItems="selectedStageFilters" />
 
-<div>
-    <strong>Filter by Policy Type:</strong><br />
-    <select @bind="selectedPolicyFilters" @bind:after="StateHasChanged" multiple class="form-select" style="height: 150px;">
-        @foreach (var policy in availablePolicies)
-        {
-            <option value="@policy">@policy</option>
-        }
-    </select>
+        </div>
+        <div>
+            <label class="form-label mb-0"><strong>Policy Type:</strong></label>
+            <MultiSelectDropdown Items="availablePolicies" @bind-SelectedItems="selectedPolicyFilters" />
+        </div>
+    </div>
+
+
+    <div>
+        <button class="btn btn-primary" @onclick="GoToAddClientPage">
+            <span class="bi bi-plus-circle-fill" aria-hidden="true"></span> New Client
+        </button>
+    </div>
 </div>
+
 
 
 <table class="table">
@@ -114,8 +117,8 @@
     private bool isAscending = true;
 
     //Filtering
-    private string[] selectedPolicyFilters = Array.Empty<string>();
-    private string selectedStageFilter = "";
+    private List<string> selectedPolicyFilters = new();
+    private List<string> selectedStageFilters = new();
     private List<string> availablePolicies = new() { "Employers Liability", "Public/Products Liability", "Professional Indemnity", "Cyber & Data", "Directors & Officers", "Commerical Property" };
 
     protected override async Task OnInitializedAsync()
@@ -190,9 +193,8 @@
         // Apply filtering
         var filtered = clients.AsEnumerable();
 
-        if(!string.IsNullOrEmpty(selectedStageFilter)){
-            filtered = filtered.Where(c => c.OnboardingStage.ToString() == selectedStageFilter);
-        }
+        if(selectedStageFilters.Any()){
+            filtered = filtered.Where(c => selectedStageFilters.Contains(c.OnboardingStage.ToString()));        }
 
         if(selectedPolicyFilters.Any()){
             filtered = filtered.Where(c=> c.PolicyTypes.Any(p => selectedPolicyFilters.Contains(p)));

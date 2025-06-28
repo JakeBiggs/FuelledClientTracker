@@ -1,0 +1,91 @@
+<div class="dropdown">
+    <button @onclick="ToggleDropdown" class="btn btn-outline-secondary dropdown-toggle" type="button">
+        @GetButtonText()
+    </button>
+    @if (isDropdownOpen)
+    {
+        <div class="dropdown-menu show p-2" style="width: 250px;">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="select-all"
+                    checked="@(Items.Any() && SelectedItems.Count == Items.Count)" @onchange="SelectAllChanged">
+                <label class="form-check-label" for="select-all">
+                    <strong>Select All</strong>
+                </label>
+            </div>
+            <hr class="my-1">
+            @foreach (var item in Items)
+            {
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="item-@item" checked="@SelectedItems.Contains(item)"
+                        @onchange="e => SelectionChanged(item, e.Value)">
+                    <label class="form-check-label" for="item-@item">
+                        @item
+                    </label>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public List<string> Items { get; set; } = new();
+
+    [Parameter]
+    public List<string> SelectedItems { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<List<string>> SelectedItemsChanged { get; set; }
+
+    private bool isDropdownOpen = false;
+
+    private void ToggleDropdown()
+    {
+        isDropdownOpen = !isDropdownOpen;
+    }
+
+    private async Task SelectAllChanged(ChangeEventArgs e)
+    {
+        if ((bool?)e.Value == true)
+        {
+            SelectedItems = new List<string>(Items);
+        }
+        else
+        {
+            SelectedItems.Clear();
+        }
+        await SelectedItemsChanged.InvokeAsync(SelectedItems);
+    }
+
+    private async Task SelectionChanged(string item, object checkedValue)
+    {
+        if ((bool)checkedValue)
+        {
+            if (!SelectedItems.Contains(item))
+            {
+                SelectedItems.Add(item);
+            }
+        }
+        else
+        {
+            if (SelectedItems.Contains(item))
+            {
+                SelectedItems.Remove(item);
+            }
+        }
+        await SelectedItemsChanged.InvokeAsync(SelectedItems);
+    }
+
+    private string GetButtonText()
+    {
+        if (!SelectedItems.Any())
+        {
+            return "Select...";
+        }
+        if (SelectedItems.Count > 2)
+        {
+            return $"{SelectedItems.Count} selected";
+        }
+        return string.Join(", ", SelectedItems);
+    }
+}
