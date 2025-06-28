@@ -71,10 +71,9 @@
 
         clients = await ClientService.GetClientsAsync();
 
-        if (clients != null && clients.Any())
-        {
-            UpdateChartData();
-        }
+
+        UpdateChartData();
+
     }
 
     private async Task OnMetricChanged(ChangeEventArgs e)
