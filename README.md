@@ -35,6 +35,11 @@ A lightweight Blazor WebAssembly application built to streamline client onboardi
 - **1:** Install MySQL
 - **2:** Use a MySQL client or Entity Framework Core along with the scripts provided to create the database and table
 - **3:** Either seed the database with the second script, or add clients directly via the frontend interface
+- **4:** Update the Connection String in appsettings.json:
+```"ConnectionStrings": {
+  "DefaultConnection": "server=;port=;database=;user=;password="
+}
+```
 
 ## Tech Stack
 
