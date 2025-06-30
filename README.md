@@ -1,6 +1,6 @@
 # Fuelled Client Tracker
 
-A lightweight Blazor WebAssembly application built to streamline client onboarding and policy tracking for an insurance broker. This was developed as a technical project for Fuelled, aligning with their mission of bringing innovation and efficiency to the insurance sector.
+A lightweight Blazor WebAssembly application built to streamline client onboarding and policy tracking for an insurance broker, aligning with their mission of bringing innovation and efficiency to the insurance sector.
 
 ---
 
@@ -31,7 +31,7 @@ A lightweight Blazor WebAssembly application built to streamline client onboardi
 
 ---
 
-## 🔍 Tech Stack
+## Tech Stack
 
 - **Frontend:** Blazor WebAssembly (.NET 9)
 - **Backend:** ASP.NET Core Web API 
@@ -58,7 +58,7 @@ A lightweight Blazor WebAssembly application built to streamline client onboardi
 
 ## Reasoning Behind the Project
 
-Fuelled's mission to integrate technology into the insurance space inspired this focused internal tool. The app simulates a typical use case in a broker environment:
+To integrate helpful technology into the insurance space inspired this focused internal tool. The app simulates a typical use case in a broker environment:
 - Onboarding new clients
 - Tracking policies
 - Monitoring renewals
@@ -72,16 +72,16 @@ My goal was to keep the app lean, extendable, and business-aligned — with clea
 
 - `Fuelled.ClientTracker` - Blazor WebAssembly frontend
 - `Fuelled.ClientTracker.Api` - ASP.NET Core backend
-- `MySQL` - Live data persistence
+- `MySQL` - Not included in this repository. Used to store clients
 
 ---
 
 ## About Me
 
 Jacob Biggs  
-📍 Malvern-based developer  
-💼 Background in embedded systems, secure comms, and full-stack web  
-🌐 [jacobbiggs.co.uk](https://jacobbiggs.co.uk)
+Malvern-based developer  
+Background in embedded systems, secure comms, and full-stack web  
+[jacobbiggs.co.uk](https://jacobbiggs.co.uk)
 
 ---
 
