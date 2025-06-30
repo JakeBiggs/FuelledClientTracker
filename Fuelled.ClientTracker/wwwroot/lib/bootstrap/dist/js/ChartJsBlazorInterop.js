@@ -229,4 +229,4 @@ class ChartJsInterop {
         return JSON.stringify(object, replacer);
     }
 }
-window[ChartJsInterop.name] = new ChartJsInterop();
+window.ChartJsInterop = new ChartJsInterop();

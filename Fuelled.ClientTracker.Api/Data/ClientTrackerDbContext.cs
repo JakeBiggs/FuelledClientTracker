@@ -17,7 +17,6 @@ namespace Fuelled.ClientTracker.Api.Data
             );
         }
 
-        // Define your DbSets here
         public DbSet<Client> Clients { get; set; }
     }
 }
